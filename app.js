@@ -26,6 +26,29 @@ const app = () => {
     const todoInput = document.getElementById('todo-input');
     const todoList = document.getElementById('todo-list');
 
+    // --- Event Listeners (Attach EARLY so they always work) ---
+    btnToggle.addEventListener('click', toggleTimer);
+    btnReset.addEventListener('click', resetTimer);
+
+    btnWork.addEventListener('click', () => {
+        if (!isWorkMode) setMode(true);
+    });
+
+    btnBreak.addEventListener('click', () => {
+        if (isWorkMode) setMode(false);
+    });
+
+    todoForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const text = todoInput.value.trim();
+        if (text) {
+            todos.push({ text, completed: false });
+            todoInput.value = '';
+            saveTodos();
+            renderTodos();
+        }
+    });
+
     // --- Init ---
     updateDisplay();
     sessionCountDisplay.textContent = sessionsCompleted;
@@ -121,24 +144,12 @@ const app = () => {
         }
     }
 
-    // --- Event Listeners ---
-    btnToggle.addEventListener('click', toggleTimer);
-    btnReset.addEventListener('click', resetTimer);
-
-    btnWork.addEventListener('click', () => {
-        if (!isWorkMode) setMode(true);
-    });
-
-    btnBreak.addEventListener('click', () => {
-        if (isWorkMode) setMode(false);
-    });
-
     // --- Todo Logic ---
     let todos = [];
     try {
-        todos = JSON.parse(localStorage.getItem('todos'));
-        if (!Array.isArray(todos)) {
-            todos = [];
+        const storedTodos = JSON.parse(localStorage.getItem('todos'));
+        if (Array.isArray(storedTodos)) {
+            todos = storedTodos;
         }
     } catch (e) {
         console.warn('localStorage not accessible for todos. State will not persist.');
@@ -153,77 +164,77 @@ const app = () => {
     }
 
     function renderTodos() {
-        todoList.innerHTML = '';
-        todos.forEach((todo, index) => {
-            const li = document.createElement('li');
-            li.className = `todo-item ${todo.completed ? 'completed' : ''}`;
-            li.dataset.index = index;
+        try {
+            todoList.innerHTML = '';
+            todos.forEach((todo, index) => {
+                const li = document.createElement('li');
+                li.className = `todo-item ${todo.completed ? 'completed' : ''}`;
+                li.dataset.index = index;
 
-            li.innerHTML = `
-                <div class="drag-handle">≡</div>
-                <div class="checkbox-wrapper">
-                    <input type="checkbox" class="checkbox" ${todo.completed ? 'checked' : ''} data-index="${index}">
-                </div>
-                <span class="todo-text">${escapeHTML(todo.text)}</span>
-                <button class="delete-btn" data-index="${index}">×</button>
-            `;
-            todoList.appendChild(li);
-        });
-
-        document.querySelectorAll('.checkbox').forEach(cb => {
-            cb.addEventListener('change', (e) => {
-                const idx = e.target.getAttribute('data-index');
-                todos[idx].completed = e.target.checked;
-                saveTodos();
-                renderTodos();
+                li.innerHTML = `
+                    <div class="drag-handle">≡</div>
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" class="checkbox" ${todo.completed ? 'checked' : ''} data-index="${index}">
+                    </div>
+                    <span class="todo-text">${escapeHTML(todo.text || "Unnamed Task")}</span>
+                    <button class="delete-btn" data-index="${index}">×</button>
+                `;
+                todoList.appendChild(li);
             });
-        });
 
-        document.querySelectorAll('.delete-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const idx = e.target.getAttribute('data-index');
-                todos.splice(idx, 1);
-                saveTodos();
-                renderTodos();
+            document.querySelectorAll('.checkbox').forEach(cb => {
+                cb.addEventListener('change', (e) => {
+                    const idx = e.target.getAttribute('data-index');
+                    if (todos[idx]) {
+                        todos[idx].completed = e.target.checked;
+                        saveTodos();
+                        renderTodos();
+                    }
+                });
             });
-        });
-    }
 
-    todoForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const text = todoInput.value.trim();
-        if (text) {
-            todos.push({ text, completed: false });
-            todoInput.value = '';
-            saveTodos();
-            renderTodos();
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const idx = e.target.getAttribute('data-index');
+                    todos.splice(idx, 1);
+                    saveTodos();
+                    renderTodos();
+                });
+            });
+        } catch (e) {
+            console.error("Error rendering todos:", e);
         }
-    });
+    }
 
     function loadTodos() {
         renderTodos();
 
-        if (typeof Sortable !== 'undefined') {
-            new Sortable(todoList, {
-                animation: 150,
-                handle: '.drag-handle',
-                ghostClass: 'sortable-ghost',
-                onEnd: function (evt) {
-                    const oldIndex = evt.oldIndex;
-                    const newIndex = evt.newIndex;
+        try {
+            if (typeof Sortable !== 'undefined') {
+                new Sortable(todoList, {
+                    animation: 150,
+                    handle: '.drag-handle',
+                    ghostClass: 'sortable-ghost',
+                    onEnd: function (evt) {
+                        const oldIndex = evt.oldIndex;
+                        const newIndex = evt.newIndex;
 
-                    if (oldIndex !== newIndex) {
-                        const movedItem = todos.splice(oldIndex, 1)[0];
-                        todos.splice(newIndex, 0, movedItem);
-                        saveTodos();
-                        renderTodos();
+                        if (oldIndex !== newIndex) {
+                            const movedItem = todos.splice(oldIndex, 1)[0];
+                            todos.splice(newIndex, 0, movedItem);
+                            saveTodos();
+                            renderTodos();
+                        }
                     }
-                }
-            });
+                });
+            }
+        } catch (e) {
+            console.error("SortableJS failed to initialize.", e);
         }
     }
 
     function escapeHTML(str) {
+        if (typeof str !== 'string') return '';
         return str.replace(/[&<>'"]/g,
             tag => ({
                 '&': '&amp;',
