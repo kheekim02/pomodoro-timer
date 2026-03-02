@@ -1,11 +1,17 @@
-document.addEventListener('DOMContentLoaded', () => {
+const app = () => {
     // --- Pomodoro State ---
     const WORK_MINUTES = 25;
     const BREAK_MINUTES = 5;
     let timeRemaining = WORK_MINUTES * 60;
     let timerInterval = null;
     let isWorkMode = true;
-    let sessionsCompleted = parseInt(localStorage.getItem('pomodoroSessions')) || 0;
+
+    let sessionsCompleted = 0;
+    try {
+        sessionsCompleted = parseInt(localStorage.getItem('pomodoroSessions')) || 0;
+    } catch (e) {
+        console.warn('localStorage not accessible for sessions. State will not persist.');
+    }
 
     // --- DOM Elements ---
     const timeDisplay = document.getElementById('time-left');
@@ -14,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnWork = document.getElementById('btn-work');
     const btnBreak = document.getElementById('btn-break');
     const sessionCountDisplay = document.getElementById('session-count');
-    
+
     // --- Todo DOM Elements ---
     const todoForm = document.getElementById('todo-form');
     const todoInput = document.getElementById('todo-input');
@@ -51,10 +57,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     timerInterval = null;
                     btnToggle.textContent = 'Start';
                     playAlarm();
-                    
+
                     if (isWorkMode) {
                         sessionsCompleted++;
-                        localStorage.setItem('pomodoroSessions', sessionsCompleted);
+                        try { localStorage.setItem('pomodoroSessions', sessionsCompleted); } catch (e) { }
                         sessionCountDisplay.textContent = sessionsCompleted;
                         setMode(false); // Switch to break
                         alert("Work session complete! Time for a break.");
@@ -95,45 +101,55 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function playAlarm() {
-        // A simple beep using AudioContext (better than requiring an external audio file)
         try {
             const ctx = new (window.AudioContext || window.webkitAudioContext)();
             const osc = ctx.createOscillator();
             const gainNode = ctx.createGain();
             osc.type = 'sine';
-            osc.frequency.setValueAtTime(440, ctx.currentTime); // A4 note
+            osc.frequency.setValueAtTime(440, ctx.currentTime);
             osc.connect(gainNode);
             gainNode.connect(ctx.destination);
-            
-            // Envelope to avoid clicking
+
             gainNode.gain.setValueAtTime(0, ctx.currentTime);
             gainNode.gain.linearRampToValueAtTime(1, ctx.currentTime + 0.1);
             gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1);
-            
+
             osc.start(ctx.currentTime);
             osc.stop(ctx.currentTime + 1);
         } catch (e) {
-            console.log("Audio not supported or blocked");
+            console.log("Audio not supported or blocked", e);
         }
     }
 
     // --- Event Listeners ---
     btnToggle.addEventListener('click', toggleTimer);
     btnReset.addEventListener('click', resetTimer);
-    
+
     btnWork.addEventListener('click', () => {
         if (!isWorkMode) setMode(true);
     });
-    
+
     btnBreak.addEventListener('click', () => {
         if (isWorkMode) setMode(false);
     });
 
     // --- Todo Logic ---
-    let todos = JSON.parse(localStorage.getItem('todos')) || [];
+    let todos = [];
+    try {
+        todos = JSON.parse(localStorage.getItem('todos'));
+        if (!Array.isArray(todos)) {
+            todos = [];
+        }
+    } catch (e) {
+        console.warn('localStorage not accessible for todos. State will not persist.');
+    }
 
     function saveTodos() {
-        localStorage.setItem('todos', JSON.stringify(todos));
+        try {
+            localStorage.setItem('todos', JSON.stringify(todos));
+        } catch (e) {
+            console.warn('Could not save to localStorage');
+        }
     }
 
     function renderTodos() {
@@ -141,7 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
         todos.forEach((todo, index) => {
             const li = document.createElement('li');
             li.className = `todo-item ${todo.completed ? 'completed' : ''}`;
-            li.dataset.index = index; // Used for SortableJS syncing
+            li.dataset.index = index;
 
             li.innerHTML = `
                 <div class="drag-handle">≡</div>
@@ -154,7 +170,6 @@ document.addEventListener('DOMContentLoaded', () => {
             todoList.appendChild(li);
         });
 
-        // Re-attach event listeners
         document.querySelectorAll('.checkbox').forEach(cb => {
             cb.addEventListener('change', (e) => {
                 const idx = e.target.getAttribute('data-index');
@@ -187,36 +202,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function loadTodos() {
         renderTodos();
-        
-        // Initialize SortableJS functionality
+
         if (typeof Sortable !== 'undefined') {
             new Sortable(todoList, {
                 animation: 150,
-                handle: '.drag-handle', // drag handle selector within list items
+                handle: '.drag-handle',
                 ghostClass: 'sortable-ghost',
                 onEnd: function (evt) {
-                    // Update array order based on DOM changes
-                    const itemEl = evt.item;  // dragged HTMLElement
                     const oldIndex = evt.oldIndex;
                     const newIndex = evt.newIndex;
-                    
+
                     if (oldIndex !== newIndex) {
-                       // Move element in the array
-                       const movedItem = todos.splice(oldIndex, 1)[0];
-                       todos.splice(newIndex, 0, movedItem);
-                       saveTodos();
-                       renderTodos(); // Full re-render to update data-index attributes
+                        const movedItem = todos.splice(oldIndex, 1)[0];
+                        todos.splice(newIndex, 0, movedItem);
+                        saveTodos();
+                        renderTodos();
                     }
                 }
             });
-        } else {
-            console.error("SortableJS failed to load.");
         }
     }
 
-    // Helper: escape HTML to prevent XSS
     function escapeHTML(str) {
-        return str.replace(/[&<>'"]/g, 
+        return str.replace(/[&<>'"]/g,
             tag => ({
                 '&': '&amp;',
                 '<': '&lt;',
@@ -226,4 +234,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }[tag])
         );
     }
-});
+};
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', app);
+} else {
+    app();
+}
