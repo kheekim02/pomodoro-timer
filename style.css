@@ -1,0 +1,339 @@
+:root {
+    --glass-bg: rgba(255, 255, 255, 0.15);
+    --glass-border: rgba(255, 255, 255, 0.25);
+    --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    --text-primary: #ffffff;
+    --text-secondary: rgba(255, 255, 255, 0.8);
+    --accent: rgba(255, 255, 255, 0.4);
+    --accent-hover: rgba(255, 255, 255, 0.6);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--text-primary);
+    overflow: hidden;
+    background: #0f2027; /* Fallback */
+    background: linear-gradient(135deg, #20002c, #cbb4d4);
+}
+
+/* Animated gradient background */
+.background-animation {
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200vw;
+    height: 200vh;
+    background: linear-gradient(
+        45deg,
+        rgba(255, 113, 113, 0.8),
+        rgba(155, 126, 255, 0.8),
+        rgba(126, 255, 222, 0.8),
+        rgba(255, 206, 126, 0.8)
+    );
+    filter: blur(80px);
+    z-index: -1;
+    animation: gradientMove 15s ease infinite alternate;
+}
+
+@keyframes gradientMove {
+    0% { transform: translate(0, 0) scale(1.1); }
+    100% { transform: translate(10%, 15%) scale(1.3); }
+}
+
+/* Glassmorphism Container */
+.glass-container {
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+    box-shadow: var(--glass-shadow);
+    padding: 2.5rem;
+    width: 90%;
+    max-width: 800px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+}
+
+@media (max-width: 768px) {
+    .glass-container {
+        grid-template-columns: 1fr;
+        padding: 2rem;
+        gap: 2rem;
+        height: 90vh;
+        overflow-y: auto;
+    }
+}
+
+/* Generic typographic classes */
+h1.logo {
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 2rem;
+    text-align: center;
+    letter-spacing: 2px;
+}
+
+h2 {
+    font-size: 1.5rem;
+    font-weight: 400;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--glass-border);
+    padding-bottom: 0.5rem;
+}
+
+/* Timer Section */
+.timer-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.mode-selector {
+    display: flex;
+    background: rgba(0,0,0,0.2);
+    border-radius: 30px;
+    padding: 4px;
+    margin-bottom: 2rem;
+    width: 100%;
+}
+
+.mode-btn {
+    flex: 1;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    padding: 0.8rem 1.5rem;
+    border-radius: 26px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.mode-btn.active {
+    background: var(--glass-bg);
+    color: var(--text-primary);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.time-display {
+    font-size: 6rem;
+    font-weight: 300;
+    letter-spacing: -2px;
+    margin-bottom: 2rem;
+    text-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.controls {
+    display: flex;
+    gap: 1rem;
+    width: 100%;
+    margin-bottom: 2rem;
+}
+
+.control-btn {
+    flex: 1;
+    padding: 1rem;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.control-btn.primary {
+    background: rgba(255, 255, 255, 0.9);
+    color: #333;
+}
+
+.control-btn.primary:hover {
+    background: #ffffff;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+}
+
+.control-btn.secondary {
+    background: transparent;
+    border: 1px solid var(--glass-border);
+    color: var(--text-primary);
+}
+
+.control-btn.secondary:hover {
+    background: var(--glass-bg);
+}
+
+.session-tracker {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+/* Todo Section */
+.todo-section {
+    display: flex;
+    flex-direction: column;
+}
+
+#todo-form {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.glass-input {
+    flex: 1;
+    background: rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--glass-border);
+    color: white;
+    padding: 0.8rem 1rem;
+    border-radius: 12px;
+    font-size: 1rem;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.glass-input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.glass-input:focus {
+    background: rgba(0, 0, 0, 0.2);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.glass-btn-add {
+    background: var(--accent);
+    color: white;
+    border: 1px solid var(--glass-border);
+    width: 3rem;
+    border-radius: 12px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.glass-btn-add:hover {
+    background: var(--accent-hover);
+}
+
+.todo-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    overflow-y: auto;
+    max-height: 400px;
+    padding-right: 5px;
+}
+
+/* Custom Scrollbar for list */
+.todo-list::-webkit-scrollbar {
+    width: 6px;
+}
+.todo-list::-webkit-scrollbar-track {
+    background: rgba(0,0,0,0.1);
+    border-radius: 10px;
+}
+.todo-list::-webkit-scrollbar-thumb {
+    background: var(--glass-border);
+    border-radius: 10px;
+}
+
+.todo-item {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    padding: 1rem;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    cursor: grab;
+    transition: background 0.2s;
+}
+
+.todo-item:active {
+    cursor: grabbing;
+}
+
+.todo-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.drag-handle {
+    opacity: 0.5;
+    cursor: grab;
+}
+
+.checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.checkbox {
+    width: 20px;
+    height: 20px;
+    border-radius: 5px;
+    border: 2px solid var(--glass-border);
+    appearance: none;
+    outline: none;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.checkbox:checked {
+    background: rgba(255, 255, 255, 0.8);
+    border-color: transparent;
+}
+
+.checkbox:checked::after {
+    content: '✓';
+    position: absolute;
+    color: #333;
+    font-size: 14px;
+    font-weight: bold;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.todo-text {
+    flex: 1;
+    font-size: 1rem;
+    transition: color 0.3s ease;
+}
+
+.todo-item.completed .todo-text {
+    text-decoration: line-through;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.delete-btn {
+    background: transparent;
+    border: none;
+    color: rgba(255, 100, 100, 0.7);
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: color 0.2s;
+}
+
+.delete-btn:hover {
+    color: rgba(255, 100, 100, 1);
+}
