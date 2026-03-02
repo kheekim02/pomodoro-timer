@@ -25,6 +25,8 @@ const app = () => {
     const todoForm = document.getElementById('todo-form');
     const todoInput = document.getElementById('todo-input');
     const todoList = document.getElementById('todo-list');
+    const btnClearCompleted = document.getElementById('btn-clear-completed');
+    const btnClearAll = document.getElementById('btn-clear-all');
 
     // --- Event Listeners (Attach EARLY so they always work) ---
     btnToggle.addEventListener('click', toggleTimer);
@@ -48,6 +50,24 @@ const app = () => {
             renderTodos();
         }
     });
+
+    if (btnClearCompleted) {
+        btnClearCompleted.addEventListener('click', () => {
+            todos = todos.filter(t => !t.completed);
+            saveTodos();
+            renderTodos();
+        });
+    }
+
+    if (btnClearAll) {
+        btnClearAll.addEventListener('click', () => {
+            if (confirm("Are you sure you want to clear all tasks?")) {
+                todos = [];
+                saveTodos();
+                renderTodos();
+            }
+        });
+    }
 
     // --- Init ---
     updateDisplay();
@@ -114,11 +134,13 @@ const app = () => {
             btnBreak.classList.remove('active');
             document.documentElement.style.setProperty('--accent', 'rgba(255, 113, 113, 0.4)');
             document.documentElement.style.setProperty('--accent-hover', 'rgba(255, 113, 113, 0.6)');
+            document.body.classList.remove('break-mode');
         } else {
             btnBreak.classList.add('active');
             btnWork.classList.remove('active');
             document.documentElement.style.setProperty('--accent', 'rgba(126, 255, 222, 0.4)');
             document.documentElement.style.setProperty('--accent-hover', 'rgba(126, 255, 222, 0.6)');
+            document.body.classList.add('break-mode');
         }
         resetTimer();
     }

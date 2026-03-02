@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,26 +10,27 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
     <div class="background-animation"></div>
     <div class="glass-container">
-        
+
         <!-- Timer Section -->
         <section class="timer-section">
             <h1 class="logo">Focus</h1>
-            
+
             <div class="mode-selector">
                 <button id="btn-work" class="mode-btn active">Work</button>
                 <button id="btn-break" class="mode-btn">Break</button>
             </div>
-            
+
             <div class="time-display" id="time-left">25:00</div>
-            
+
             <div class="controls">
                 <button id="btn-toggle" class="control-btn primary">Start</button>
                 <button id="btn-reset" class="control-btn secondary">Reset</button>
             </div>
-            
+
             <div class="session-tracker">
                 <p>Sessions completed today: <span id="session-count">0</span></p>
             </div>
@@ -37,15 +39,21 @@
         <!-- Todo Section -->
         <section class="todo-section">
             <h2>Priorities</h2>
-            
+
             <form id="todo-form">
-                <input type="text" id="todo-input" class="glass-input" placeholder="Add a new task..." required autocomplete="off">
+                <input type="text" id="todo-input" class="glass-input" placeholder="Add a new task..." required
+                    autocomplete="off">
                 <button type="submit" class="glass-btn-add">+</button>
             </form>
-            
+
             <ul id="todo-list" class="todo-list">
                 <!-- Todo items will be injected here -->
             </ul>
+
+            <div class="todo-actions">
+                <button id="btn-clear-completed" class="action-btn">Clear Completed</button>
+                <button id="btn-clear-all" class="action-btn danger">Clear All</button>
+            </div>
         </section>
 
     </div>
@@ -54,4 +62,5 @@
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <script src="app.js"></script>
 </body>
+
 </html>
